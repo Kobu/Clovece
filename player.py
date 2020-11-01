@@ -1,12 +1,23 @@
+import figurine
+
 
 class Player:
-    def __init__(self, color, name, figurines):
+    def __init__(self, name):
         self.name = name
-        self.color = color
-        self.figurines = figurines
 
-    def set_top_square(self, coords):
-        self.top_square = coords
+        self.color = None
+        self.top_square = None
+        self.start_square = None
+        self.letter = None
 
-    def set_start_square(self, coords):
-        self.start_square = coords
+        self.figurines = self.create_figurines()
+
+    def create_figurines(self):
+        return [figurine.Figurine(self.name, self.letter) for i in range(4)]
+
+    def has_figurine_out(self):
+        for figurine in self.figurines:
+            # TODO AND is not in home
+            if figurine.position is not  None and not figurine.home:
+                return figurine
+        return False

@@ -1,7 +1,8 @@
-import game_board
-import figurine
-import player
 import random
+
+import figurine
+import game_board
+import player
 
 
 class Clovece:
@@ -9,16 +10,24 @@ class Clovece:
         self.board = board
 
         self.players = players
-        self.set_top_square()
-        self.set_start_squares()
+        self.prepare_board()
         # self.set_figurines()
         # self.fig2 = fig2
 
         self.square = [-(self.board.size // 2), 1]
         self.path = self.calculate_path()
 
+    def prepare_board(self):
+        for index, player in enumerate(self.players):
+            player.start_square = self.board.start_squares[index]
+            player.top_square = self.board.top[index]
+
+            player.color = game_board.COLORS[index]
+            player.letter = game_board.LETTERS[index]
+
     def calculate_path(self):
         result = []
+        # TODO clean this, remove self.square
         for i in range(4 * self.board.size - 4):
             next_square = self.get_next_square(self.square)
             self.square = next_square
@@ -31,14 +40,6 @@ class Clovece:
     #             # TODO set eachs player unique letter
     #             self.board.update_player_pos(figurine.name, figurine.position)
 
-    def set_start_squares(self):
-        for index, player in enumerate(self.players):
-            player.set_start_square(self.board.start_squares[index])
-
-    def set_top_square(self):
-        for index, player in enumerate(self.players):
-            player.set_top_square(self.board.top[index])
-
     def is_occupied(self, coords):
         for player in self.players:
             for figurine in player.figurines:
@@ -48,18 +49,31 @@ class Clovece:
 
     @staticmethod
     def throw():
-        result = random.randint(1, 6)
-        return result if result != 6 else result + random.randint(1, 6)
+        return random.randint(1, 6)
+        # return result if result != 6 else result + random.randint(1, 6)
 
-    def turn(self, fig: figurine.Figurine, play: player.Player):
+    # TODO code needs to be restructured to allow throwing a 6
+    def turn(self, fig: figurine.Figurine, player: player.Player):
         previous_pos = fig.position
+        dice = self.throw()
+
+        if not player.has_figurine_out():
+            print("checking if has figurines out")
+            if dice == 6:
+                print("threw 6")
+                fig.initialize_figurine(player.start_square)
+                self.board.update_player_pos(player.letter, player.start_square)
+                return
+            else:
+                print("no figurines out and didn't throw 6")
+                return
 
         if fig.home:
             print("already home")
             self.board.update_player_pos(fig.name, fig.position)
             return
 
-        coords = self.calculate_move_sequence(play, fig)
+        coords = self.calculate_move_sequence(dice, player, fig)
 
         if fig2 := self.is_occupied(coords):
             print("is occupied")
@@ -85,12 +99,11 @@ class Clovece:
             print("number too high")
             return fig.position
         else:
-            print("succesfuly gone to ohome")
+            print("successfully gone to home")
             fig.in_home()
             return self.get_home(coords, amount)
 
-    def calculate_move_sequence(self, play: player.Player, fig: figurine.Figurine):
-        dice = self.throw()
+    def calculate_move_sequence(self, dice,  play: player.Player, fig: figurine.Figurine):
         index = self.path.index(fig.position)
         print(f"{play.color} threw: {dice}")
 
@@ -108,7 +121,9 @@ class Clovece:
                 else:
                     print("to home")
                     return self.go_to_home(fig, next_square, dice - i)
-        return next_square
+            else:
+                return next_square
+        # return next_square
 
     @staticmethod
     def get_home(coords, amnt):
@@ -181,19 +196,16 @@ class Clovece:
 
 board1 = game_board.Board(9, "O", "X", " ", ".")
 
-figurka1 = figurine.Figurine("kobu", [-4,1], "B")
-player1 = player.Player("blue", "kobu", [figurka1])
+player1 = player.Player("kobu")
 
-figurka2 = figurine.Figurine("max", [1,4], "G")
-player2 = player.Player("green", "max", [figurka2])
+player2 = player.Player( "max")
 
 game = Clovece(board1, [player1, player2])
 game.board.print_board()
 
-game.turn(figurka2, player2)
-
-for i in range(3):
-    game.turn(figurka1, player1)
+#
+for i in range(20):
+    game.turn(player1.figurines[0], player1)
 
     game.board.print_board()
     print("_________________")

@@ -1,3 +1,7 @@
+#TODO add package level constants COLORS, LETTERS
+COLORS = ["Blue", "Green", "Yellow", "Red"]
+LETTERS = ["B", "G", "Y", "R"]
+
 class Board:
     def __init__(self, size, playing_square, home_square, middle_square, empty_square):
         self.size = size
