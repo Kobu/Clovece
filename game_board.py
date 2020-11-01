@@ -8,8 +8,8 @@ class Board:
         self.home_square = home_square
         self.middle_square = middle_square
 
-        self.start_squares = [[-self.size//2, 1], [1, self.size//2], [self.size//2, -1], [1, self.size//2]]
-        self.top = [[0, self.size // 2], [-self.size // 2, 0], [0, -self.size // 2],[self.size // 2, 0]]
+        self.top = [[-(self.size // 2), 0], [0, self.size // 2],[self.size // 2, 0],   [0, -(self.size // 2)]]
+        self.start_squares = [[-(self.size//2), 1], [1, self.size//2], [self.size//2, -1], [1, self.size//2]]
 
         self.board = self.create_board()
 

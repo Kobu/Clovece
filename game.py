@@ -48,7 +48,8 @@ class Clovece:
 
     @staticmethod
     def throw():
-        return random.randint(1, 6)
+        result = random.randint(1, 6)
+        return result if result != 6 else result + random.randint(1, 6)
 
     def turn(self, fig: figurine.Figurine, play: player.Player):
         previous_pos = fig.position
@@ -61,15 +62,17 @@ class Clovece:
         coords = self.calculate_move_sequence(play, fig)
 
         if fig2 := self.is_occupied(coords):
+            print("is occupied")
+            if fig2 == fig:
+                return
             if fig2.owner == fig.owner:
                 print("cant go here, u got a figurine there")
-                return
-            if fig2 == fig:
                 return
             else:
                 # TODO delete the other player = update the board,
                 fig2.remove_from_board()
-                self.board.update_player_pos(fig.name, coords, fig2.pos)
+                print(fig2.position)
+                self.board.update_player_pos(fig.name, coords, fig2.position)
         fig.set_pos(coords)
         self.board.update_player_pos(fig.name, coords, previous_pos)
 
@@ -89,7 +92,7 @@ class Clovece:
     def calculate_move_sequence(self, play: player.Player, fig: figurine.Figurine):
         dice = self.throw()
         index = self.path.index(fig.position)
-        print(dice)
+        print(f"{play.color} threw: {dice}")
 
         for i in range(1, dice + 1):
             next_index = self.get_next_index(index, i)
@@ -178,14 +181,19 @@ class Clovece:
 
 board1 = game_board.Board(9, "O", "X", " ", ".")
 
-figurka1 = figurine.Figurine("kobu", [-1, 3], "P")
+figurka1 = figurine.Figurine("kobu", [-4,1], "B")
 player1 = player.Player("blue", "kobu", [figurka1])
 
-figurka2 = figurine.Figurine("max", [-1, 3], "B")
+figurka2 = figurine.Figurine("max", [1,4], "G")
 player2 = player.Player("green", "max", [figurka2])
 
 game = Clovece(board1, [player1, player2])
+game.board.print_board()
 
-# game.board.print_board()
-for player in game.players:
-    print(player.top_square, player.start_square)
+game.turn(figurka2, player2)
+
+for i in range(3):
+    game.turn(figurka1, player1)
+
+    game.board.print_board()
+    print("_________________")
