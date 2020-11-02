@@ -21,3 +21,7 @@ class Player:
             if figurine.position is not  None and not figurine.home:
                 return figurine
         return False
+
+    def pick_figurine(self):
+        number = int(input())
+        return self.figurines[number]

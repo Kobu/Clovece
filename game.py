@@ -4,20 +4,22 @@ import figurine
 import game_board
 import player
 
+# TODO make an exception system in self.is_move_possible, try-except in self.turn
 
+# TODO move inside home square
+
+# TODO pick a figurine u want to move
 class Clovece:
     def __init__(self, board: game_board.Board, players):
         self.board = board
 
         self.players = players
-        self.prepare_board()
-        # self.set_figurines()
-        # self.fig2 = fig2
+        self.prepare_game()
 
         self.square = [-(self.board.size // 2), 1]
         self.path = self.calculate_path()
 
-    def prepare_board(self):
+    def prepare_game(self):
         for index, player in enumerate(self.players):
             player.start_square = self.board.start_squares[index]
             player.top_square = self.board.top[index]
@@ -34,11 +36,8 @@ class Clovece:
             result.append(next_square)
         return result
 
-    # def set_figurines(self):
-    #     for player in self.players:
-    #         for figurine in player.figurines:
-    #             # TODO set eachs player unique letter
-    #             self.board.update_player_pos(figurine.name, figurine.position)
+
+
 
     def is_occupied(self, coords):
         for player in self.players:
@@ -49,41 +48,89 @@ class Clovece:
 
     @staticmethod
     def throw():
-        return random.randint(1, 6)
-        # return result if result != 6 else result + random.randint(1, 6)
+        a = []
+        while(True):
+            dice = random.randint(1,6)
+            a.append(dice)
+            if dice != 6:
+                break
+        return a
+
+
+    # TODO will call is_move_possible
+    def turn(self, player: player.Player):
+        dice = self.throw()
+        fig = player.pick_figurine()
+
+        # for number in dice:
+            # try move possible ?
+                # if possible - return coords
+                # tepm_coords = coords
+            # except Exception as e:
+                # print(e)
+
+    def can_initialize_figurine(self, dice, fig: figurine.Figurine, player: player.Player):
+        pass
 
     # TODO code needs to be restructured to allow throwing a 6
-    def turn(self, fig: figurine.Figurine, player: player.Player):
+    # TODO maybe an upper method that contains the self.throw() method
+    # TODO return type = bool ?, [next_pos, previous pos] / None(error message)?
+    # if error_message then print the message and return
+    # else
+    def is_move_possible(self, dice, fig: figurine.Figurine, player: player.Player):
         previous_pos = fig.position
-        dice = self.throw()
 
-        if not player.has_figurine_out():
-            print("checking if has figurines out")
-            if dice == 6:
-                print("threw 6")
-                fig.initialize_figurine(player.start_square)
-                self.board.update_player_pos(player.letter, player.start_square)
-                return
-            else:
-                print("no figurines out and didn't throw 6")
-                return
+        # a player can pick:
+            # a figurine thats already home:
+                # can move DICE amount of squares ?
+                    # true -> move it
+                    # false -> pick another figurine
+            # a figurine on playing square:
+                # can move DICE amount of squares ?
+                    # true - >
+                        # is there another figurine ?
+                            # true ->
+                                # is it your figurine ?
+                                    # true -> pick another figurine
+                                    # false -> knock out the other player and move here
+                            # false ->
+                                # move here
+                    # false ->
+                        # pick another figurine
+        # a figurine not initialized
+            # can it be initialized ? (== u dont have ur own figurine standing on ur start square)
+
+        # TODO extract a method here
+        # if not player.has_figurine_out():
+        #     print("checking if has figurines out")
+        #     if dice == 6:
+        #         print("threw 6")
+        #         fig.initialize_figurine(player.start_square)
+        #         self.board.update_player_pos(player.letter, player.start_square)
+        #         return
+        #     else:
+        #         print("no figurines out and didn't throw 6")
+        #         return
 
         if fig.home:
             print("already home")
-            self.board.update_player_pos(fig.name, fig.position)
-            return
+            # TODO can be removed ?
+            return [fig.position, None]
+            # self.board.update_player_pos(fig.name, fig.position)
+            # return
 
         coords = self.calculate_move_sequence(dice, player, fig)
 
+        # TODO extract a method here
         if fig2 := self.is_occupied(coords):
             print("is occupied")
             if fig2 == fig:
                 return
-            if fig2.owner == fig.owner:
+            if fig2.owner == fig.owner and dice !=6:
                 print("cant go here, u got a figurine there")
                 return
             else:
-                # TODO delete the other player = update the board,
+                # TODO delete the other player and update the board,
                 fig2.remove_from_board()
                 print(fig2.position)
                 self.board.update_player_pos(fig.name, coords, fig2.position)
@@ -204,8 +251,9 @@ game = Clovece(board1, [player1, player2])
 game.board.print_board()
 
 #
-for i in range(20):
-    game.turn(player1.figurines[0], player1)
-
-    game.board.print_board()
-    print("_________________")
+print(game.throw())
+# for i in range(20):
+#     game.is_move_possible(player1.figurines[0], player1)
+#
+#     game.board.print_board()
+#     print("_________________")
