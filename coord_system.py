@@ -4,54 +4,43 @@
 # abs
 
 
-class Coords:
+def make_abs(coords):
+    return [abs(coord) for coord in coords]
 
-    def __init__(self, x=None, y=None, value: list = None):
-        self._x = x
-        self._y = y
 
-        if value:
-            self.value = value
-        else:
-            self.value = [x, y]
+def add(coords1, coords2):
+    return [coords1[i] + coords2[i] for i in range(len(coords2))]
 
-    def __abs__(self):
-        return Coords(abs(self._x), abs(self._y))
 
-    def __add__(self, other):
-        if isinstance(other, Coords):
-            first_value = self.value[0] + other.value[0]
-            second_value = self.value[1] + other.value[1]
-            return Coords(first_value, second_value)
-        else:
-            raise TypeError()
+# keep in mind it COMPARES ABSOLUTE VALUES
+def change_lower(coords, amount):
+    print(coords)
+    x, y = coords
+    abs_x, abs_y = make_abs(coords)
 
-    def __str__(self):
-        return str(self.value)
+    return [x, y + amount] if abs_x > abs_y else [x + amount, y]
 
-    def __iter__(self):
-        return iter((self._x, self._y))
 
-    # TODO keep in mind it COMPARES ABSOLUTE VALUES
-    def change_lower(self, amount):
-        abs_coords = abs(self)
-        return Coords(self._x, self._y + amount) if abs_coords._x > abs_coords._y else Coords(self._x + amount, self._y)
+def change_higher(coords, amount):
+    print(coords)
+    x, y = coords
+    abs_x, abs_y = make_abs(coords)
 
-    def change_higher(self, amount):
-        abs_coords = abs(self)
-        return Coords(self._x, self._y + amount) if abs_coords._x < abs_coords._y else Coords(self._x + amount, self._y)
+    return [x, y + amount] if abs_x < abs_y else [x + amount, y]
 
-    # TODO add this to coord_system
-    def change_one_direction(self, other_coord, template):
-        x = self._x + other_coord._x if template[0] else self._x
-        y = self._y + other_coord._y if template[1] else self._y
 
-        return Coords(x, y)
+def change_one_direction(coords, other_coord, template):
+    x = coords[0] + other_coord[0] if template[0] else coords[0]
+    y = coords[1] + other_coord[1] if template[1] else coords[1]
 
-    def translate_to_negative(self, floored_size):
-        x, y = self
-        return Coords(x - floored_size, y - floored_size)
+    return [x, y]
 
-    def translate_to_normal(self, floored_size):
-        x, y = self
-        return Coords(x + floored_size, y + floored_size)
+
+def translate_to_negative(coords, floored_size):
+    x, y = coords
+    return [x - floored_size, y - floored_size]
+
+
+def translate_to_normal(coords, floored_size):
+    x, y = coords
+    return [x + floored_size, y + floored_size]

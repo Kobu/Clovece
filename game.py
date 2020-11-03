@@ -1,5 +1,6 @@
 import random
 
+import coord_system
 import figurine
 import game_board
 import player
@@ -54,18 +55,20 @@ class Clovece:
         fig = player.figurines[0]
         coords = fig.position
 
+
+
         calculated_moves = []
         for number in dice:
             coords = self.calculate_next_square(number, player, coords, fig)
             calculated_moves.append(coords)
-        print(calculated_moves[0])
 
         possible_moves = []
         for move in calculated_moves:
             possible_moves.append(self.is_coord_available(move, fig))
 
-        if possible_moves[len(possible_moves) - 1]:
+        if possible_moves[len(possible_moves) - 1]: # TODO extract method here
             for index, move in enumerate(calculated_moves):
+
                 if index == 0:
                     self.do_move(move, fig, fig.position)
                 else:
@@ -81,8 +84,7 @@ class Clovece:
             if another_figurine.owner != fig.owner:
                 self.board.update_player_pos(another_figurine.name, None, another_figurine.position)
                 another_figurine.knockout_figurine()
-
-        self.board.update_player_pos(fig.name, coords, previous_coords)
+        self.board.update_player_pos("B", coords, previous_coords)
 
     # if error_message then print the message and return
     # else
@@ -97,42 +99,44 @@ class Clovece:
 
     # called when standing iside home
     def can_move_in_home(self, coords, dice):
-        if max(abs(coords[0]), abs(coords[1])) - dice > 0:
+
+        abs_x, abs_y = coord_system.make_abs(coords)
+        if max(abs_x, abs_y) - dice > 0:
             return self.mechanics.get_home(coords, dice)
         else:
             # raise exception here
             # cant move, pick another figurine or halt
             return False
 
-    def calculate_next_square(self, dice, play: player.Player, coords: Coords, fig):
+    def calculate_next_square(self, dice, play: player.Player, coords, fig):
         # TODO replace with a if is.home check
+
         print(f"{play.color} threw: {dice}")
-        # try:
-        #     index = self.path.index(coords)
-        # except ValueError:
-        #     return self.can_move_in_home(coords, dice)
+        try:
+            index = self.mechanics.path.index(coords)
+        except ValueError:
+            return self.can_move_in_home(coords, dice)
 
         result = None
 
         for i in range(1, dice + 1):
-            # next_index = self.get_next_index(index, i)
+            next_square = self.mechanics.get_next_step(index, i)
             if coords == play.top_square:
                 print("standing on home")
                 return self.go_to_home(fig, coords, dice)
             # if (next_square := self.path[next_index]) == play.top_square:
-            next_square = self.mechanics.get_next_square(coords)
+            # next_square = self.mechanics.path[next_index]
             if next_square == play.top_square:
                 if i == dice:
                     print("stopped at home")
-                    # return next_square
-                    return self.mechanics.get_next_step()
+                    return next_square
                 else:
                     print("to home")
                     return self.go_to_home(fig, next_square, dice - i)
             else:
                 print("clear path")
-                # result = next_square
-                result = coords + i
+                result = next_square
+        print(result)
         return result
 
     # called when standing on top square
@@ -156,8 +160,9 @@ player2 = player.Player("max")
 game = Clovece(board1, [player1, player2])
 game.board.print_board()
 
-player1.figurines[0].set_pos(Coords(4, 0))
+player1.figurines[0].set_pos([4, 0])
 
 for i in range(5):
     game.turn(player1)
+    game.board.print_board_raw()
     game.board.print_board()

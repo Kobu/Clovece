@@ -10,10 +10,10 @@ class Player:
         self.start_square = None
         self.letter = None
 
-        # self.figurines = self.create_figurines()
+        self.figurines = self.create_figurines()
 
     def create_figurines(self):
-        self.figurines = [figurine.Figurine(self.name, self.letter) for i in range(4)]
+        return [figurine.Figurine(self.name, self.letter) for i in range(4)]
 
     def has_figurine_out(self):
         for figurine in self.figurines:
