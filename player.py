@@ -10,15 +10,14 @@ class Player:
         self.start_square = None
         self.letter = None
 
-        self.figurines = self.create_figurines()
+        # self.figurines = self.create_figurines()
 
     def create_figurines(self):
-        return [figurine.Figurine(self.name, self.letter) for i in range(4)]
+        self.figurines = [figurine.Figurine(self.name, self.letter) for i in range(4)]
 
     def has_figurine_out(self):
         for figurine in self.figurines:
-            # TODO AND is not in home
-            if figurine.position is not  None and not figurine.home:
+            if figurine.position is not None or not figurine.home:
                 return figurine
         return False
 
