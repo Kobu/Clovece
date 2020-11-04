@@ -8,11 +8,11 @@ class GameMechanics:
         self.path = self.calculate_path()
 
     def calculate_path(self):
-        # start_coord = [-(self.board_size // 2), 1]  # can be anything # TODO remove the negative
         start_coord = [self.board_size // 2, 1]
         amount_of_playing_squares = 4 * self.board_size - 4
 
         result = []
+        # TODO could be simplified be declaring next_coord outside of the loop an assigning it start_coord
         for i in range(amount_of_playing_squares):
             next_coord = self.get_next_square(start_coord)
             start_coord = next_coord
@@ -77,7 +77,7 @@ class GameMechanics:
                       (0, -self.board_size // 2): [-1, 0],
                       (self.board_size // 2, 0): [0, -1]}
 
-        key = tuple(coords)    # only to look op in the edge_cases table
+        key = tuple(coords)    # only to look up in the edge_cases table
         if key in edge_cases:
             return add(coords, edge_cases[key])
 
