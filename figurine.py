@@ -17,3 +17,5 @@ class Figurine:
 
     def knockout_figurine(self):
         self.position = None
+
+

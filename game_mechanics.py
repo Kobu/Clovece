@@ -7,6 +7,8 @@ class GameMechanics:
 
         self.path = self.calculate_path()
 
+    # TODO creating the path can be simplified by a simple for loop code block
+
     def calculate_path(self):
         start_coord = [self.board_size // 2, 1]
         amount_of_playing_squares = 4 * self.board_size - 4
@@ -31,6 +33,7 @@ class GameMechanics:
         else:
             return change_higher(coords, amount)
 
+    # REFACTOR change bools to tuples, then return by key
     @staticmethod
     def get_quadrant(coords):
         res = [coord > 0 for coord in coords]

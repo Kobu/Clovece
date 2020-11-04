@@ -30,14 +30,7 @@ class Clovece:
             player.letter = game_board.LETTERS[index]
             player.create_figurines()
 
-    # TODO change to is_occupied -> bool and get_fig_on_coords -> figurine
-    def is_occupied(self, coords):
-        for player in self.players:
-            for figurine in player.figurines:
-                if figurine.position == coords:
-                    return figurine
-        return False
-
+    # DONE
     @staticmethod
     def throw():
         a = []
@@ -49,11 +42,12 @@ class Clovece:
         return a
         # return [6, 6, 1]
 
-    def calculate_moves(self, dice, player, coords, fig):
-        return [self.calculate_next_square(number, player, coords, fig) for number in dice]
+    def calculate_moves(self, dice, player, coords):
+        return [self.calculate_next_square(number, player, coords) for number in dice]
 
     def is_move_sequence_possible(self, calculated_moves, fig):
         last_move = calculated_moves[len(calculated_moves)-1]
+        # TODO AND NOT NONE IN caulcated_moves
         return self.is_coord_available(last_move, fig)
 
     def turn(self, player: player.Player):
@@ -62,19 +56,9 @@ class Clovece:
         coords = fig.position
 
         # TODO there MUST be a fig.home check here, before calculating moves
-        # if home -> check cam_move_in_home am=nd return
 
-        # calculated_moves = []  # TODO extract method here
-        # for number in dice:
-        #     coords = self.calculate_next_square(number, player, coords, fig)
-        #     calculated_moves.append(coords)
-        calculated_moves = self.calculate_moves(dice, player, coords, fig)
+        calculated_moves = self.calculate_moves(dice, player, coords)
 
-        # # TODO extract method here
-        # for move in calculated_moves:
-        #     possible_moves.append(self.is_coord_available(move, fig))
-
-        # if possible_moves[len(possible_moves) - 1]:  # TODO extract a simple method here
         if self.is_move_sequence_possible(calculated_moves, fig):
             for index, move in enumerate(calculated_moves):  # TODO extract method here
 
@@ -86,87 +70,71 @@ class Clovece:
                 if index == len(calculated_moves) - 1:
                     fig.set_pos(move)
 
-    # TODO maybe add an decorator that would update the board ?
-    # TODO move line 76 here ?
-    def do_move(self, coords, fig: figurine.Figurine, previous_coords):
-        if another_figurine := self.is_occupied(coords):
-            if another_figurine.owner != fig.owner:
-                self.board.update_player_pos(another_figurine.name, None, another_figurine.position)
-                another_figurine.knockout_figurine()
-        self.board.update_player_pos("B", coords, previous_coords)
-
-    # if error_message then print the message and return
-    # else
-    def is_coord_available(self, coords, fig: figurine.Figurine):
-        if not coords:
-            return False
-
-        # TODO something smells here
-        if another_figurine := self.is_occupied(coords):
-            return another_figurine.owner != fig.owner
+    # REFACTOR could add this to Figurine class
+    def can_step_on_coords(self, coords, fig: figurine.Figurine):
+        if self.is_occupied(coords):
+            return self.get_fig_from_coords(coords).owner != fig.owner
         else:
             return True
 
-    # called when standing iside home
-    def can_move_in_home(self, coords, dice):
+    # DONE
+    def is_occupied(self, coords):
+        for player in self.players:
+            for figurine in player.figurines:
+                if figurine.position == coords:
+                    return True
+        return False
+
+    # DONE
+    def get_fig_from_coords(self, coords):
+        for player in self.players:
+            for figurine in player.figurines:
+                if figurine.position == coords:
+                    return figurine
+        return None
+
+    # TODO completly remake this
+    def do_move(self, coords, fig: figurine.Figurine, previous_coords):
+        pass
+
+    # TEST needed
+    # REFACTOR maybe add this to the figurine class, remove coords, use fig.pos instead
+    # called when standing inside home OR at the top square
+    @staticmethod
+    def can_move_in_home(coords, dice):
         abs_x, abs_y = coord_system.make_abs(coords)
 
-        if max(abs_x, abs_y) - dice > 0:
-            return self.mechanics.get_home(coords, dice)
-        else:
-            # raise exception here
-            # cant move, pick another figurine or halt
-            return False
+        return max(abs_x, abs_y) - dice > 0
 
-    def calculate_next_square(self, dice, play: player.Player, coords, fig):
-        # TODO replace with a if is.home check
+    def is_on_top_square(self, coords, player, dice):
 
+    def calculate_next_square(self, dice, play: player.Player, coords):
         print(f"{play.color} threw: {dice}")
-        try:
-            index = self.mechanics.path.index(coords)
-        except ValueError:
-            return self.can_move_in_home(coords, dice)
 
-        # TODO can be put outside of the for loop block ?
+        # REFACTOR could extract a is_on_top_square method from this
         if coords == play.top_square:
             print("standing on home")
-            return self.go_to_home(fig, coords, dice)
-
+            if self.can_move_in_home(coords, dice):
+                print("can move in home")
+                return self.mechanics.get_home(coords, dice)
+            else:
+                #  NOTE will return None to represent an impossible move
+                return None
+        index = self.mechanics.path.index(coords)
         next_square = None
 
         # TODO maybe simplify this ?
         for i in range(1, dice + 1):
             next_square = self.mechanics.get_next_step(index, i)
 
-            # # TODO can be put outside of the for loop block ?
-            # if coords == play.top_square:
-            #     print("standing on home")
-            #     return self.go_to_home(fig, coords, dice)
-            # if (next_square := self.path[next_index]) == play.top_square:
-            # next_square = self.mechanics.path[next_index]
-            # TODO Simplify this
-            if next_square == play.top_square:
-                if i == dice:
-                    print("stopped at home")
-                    return next_square
-                else:
-                    print("to home")
-                    return self.go_to_home(fig, next_square, dice - i)
-            else:
-                print("clear path")
+            # will aim to home
+            if next_square == play.top_square and dice != i:
+                # check if the move is possible
+                if self.can_move_in_home(next_square, dice-i):
+                    return self.mechanics.get_home(next_square, dice - i)
+
         return next_square
 
-    # called when standing on top square
-    # TODO restructure to return a bool/None if amount > self.board.amnt_of_home_squares, remove fig as paraneter
-    # TODO this MUST be changed, fig.in_home needs to be removed
-    def go_to_home(self, fig: figurine.Figurine, coords, amount):
-        if amount > self.board.amnt_of_home_squares:
-            print("number too high")
-            return fig.position
-        else:
-            print("successfully gone to home")
-            fig.in_home()
-            return self.mechanics.get_home(coords, amount)
 
 
 board1 = game_board.Board(9, "O", "X", " ", ".")
