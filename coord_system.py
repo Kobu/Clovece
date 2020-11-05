@@ -1,7 +1,3 @@
-# change_lower
-# change_higher
-# add to coord
-# abs
 
 
 def make_abs(coords):
@@ -12,17 +8,16 @@ def add(coords1, coords2):
     return [coords1[i] + coords2[i] for i in range(len(coords2))]
 
 
-# keep in mind it COMPARES ABSOLUTE VALUES
+# NOTE - COMPARES ABSOLUTE VALUES
 def change_lower(coords, amount):
-    print(coords)
     x, y = coords
     abs_x, abs_y = make_abs(coords)
 
     return [x, y + amount] if abs_x > abs_y else [x + amount, y]
 
 
+# NOTE - COMPARES ABSOLUTE VALUES
 def change_higher(coords, amount):
-    print(coords)
     x, y = coords
     abs_x, abs_y = make_abs(coords)
 

@@ -2,12 +2,15 @@ import coord_system
 
 COLORS = ["Blue", "Green", "Yellow", "Red"]
 LETTERS = ["B", "G", "Y", "R"]
+FIGURINE_LETTERS = ["1", "2", "3", "4"]
 
+
+# TODO MAKE PLAYERS FIGURINES IN THE COLOR OF THE PLAYER AND BOLD -> WILl NEED IMPORTING OTHER FILES
 
 class Board:
     def __init__(self, size, playing_square, home_square, middle_square, empty_square):
         self.size = size
-        self.amnt_of_home_squares = self.size // 2 - 1
+        self.amnt_of_home_squares = self.size // 2 - 1  # REFACTOR not used ?
 
         self.empty_square = empty_square
         self.playing_square = playing_square
@@ -41,6 +44,7 @@ class Board:
 
     def update_player_pos(self, fig_name, new_coords, previous_coords=None):
         # TODO can be simplified
+        # TODO clean this mess
         if new_coords is None:
             self.delete_previous_pos(previous_coords)
             return
@@ -57,3 +61,6 @@ class Board:
     def print_board_raw(self):
         for row in self.board:
             print(row)
+
+    # def pick_figurine(self, board, coords):
+    #     for coord in coords:
