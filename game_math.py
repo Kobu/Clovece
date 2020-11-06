@@ -120,6 +120,10 @@ class GameMechanics:
                 break
         return dice
 
+    @staticmethod
+    def get_dice_permutations(dice):
+        pass
+
     def calculate_moves(self, dice, top_square, coords):
         next_coords = coords
 
