@@ -1,5 +1,7 @@
 import random
 
+from sympy.utilities.iterables import multiset_permutations
+
 from coord_system import *
 
 
@@ -106,6 +108,12 @@ class GameMechanics:
     def go_to_home(self, coords, dice):
         return self.get_home(coords, dice) if self.can_move_in_home(coords, dice) else None
 
+    def get_path_from_home(self, start_square, top_square, dice):
+        first_move = start_square
+        calculated_moves = self.calculate_moves(dice, top_square, start_square)
+
+        return [first_move, *calculated_moves]
+
     ################################ UNIVERSALLY USED CALCULATIONS ###############################
 
     # DONE
@@ -122,7 +130,7 @@ class GameMechanics:
 
     @staticmethod
     def get_dice_permutations(dice):
-        pass
+        return list(multiset_permutations(dice))
 
     def calculate_moves(self, dice, top_square, coords):
         next_coords = coords
@@ -131,6 +139,8 @@ class GameMechanics:
         for number in dice:
             next_coords = self.calculate_next_square(number, top_square, next_coords)
             moves.append(next_coords)
+            if next_coords is None:  # NONE represents an impossible move sequence, loop can be stopped because NONE is checked for later on
+                break
         return moves
 
     def calculate_next_square(self, dice, top_square, coords):
@@ -151,3 +161,10 @@ class GameMechanics:
                 return self.go_to_home(next_square, dice - i)
 
         return next_square
+
+    ################################ HELPER METHODS ################################
+
+    def create_move_choice_prompt(self, dice):
+        permutations = self.get_dice_permutations(dice)
+
+        return {index: move for index, move in enumerate(permutations)}

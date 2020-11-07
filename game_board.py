@@ -1,6 +1,8 @@
+from termcolor import colored
+
 import coord_system
 
-COLORS = ["Blue", "Green", "Yellow", "Red"]
+COLORS = ["blue", "green", "yellow", "red"]
 LETTERS = ["B", "G", "Y", "R"]
 FIGURINE_LETTERS = ["1", "2", "3", "4"]
 
@@ -28,23 +30,35 @@ class Board:
         board = [[self.empty_square] * self.size for i in range(self.size)]
         for y in range(self.size):
             for x in range(self.size):
+
                 if abs(x - self.size // 2) <= 1 or abs(y - self.size // 2) <= 1:
                     board[x][y] = self.playing_square
-                if (x - self.size // 2 == 0 and y != 0 and y != self.size - 1) or (
-                        y - self.size // 2 == 0 and x != 0 and x != self.size - 1):
-                    board[x][y] = self.home_square
+
+                if x not in [0, self.size - 1]:
+                    if x < self.size // 2 and y == self.size // 2:
+                        board[x][y] = colored(self.home_square, "blue")
+                    elif x > self.size // 2 and y == self.size // 2:
+                        board[x][y] = colored(self.home_square, "red")
+
+                if y not in [0, self.size - 1]:
+                    if y > self.size // 2 and x == self.size // 2:
+                        board[x][y] = colored(self.home_square, "green")
+                    elif y < self.size // 2 and x == self.size // 2:
+                        board[x][y] = colored(self.home_square, "yellow")
+
                 if [x, y] == [self.size // 2, self.size // 2]:
                     board[x][y] = self.middle_square
 
         return board
 
     def delete_previous_pos(self, previous_pos):
-        x, y = coord_system.translate_to_normal(previous_pos, self.size//2)
+        x, y = coord_system.translate_to_normal(previous_pos, self.size // 2)
         self.board[x][y] = self.playing_square
 
     def update_player_pos(self, fig_name, new_coords, previous_coords=None):
         # TODO can be simplified
         # TODO clean this mess
+
         if new_coords is None:
             self.delete_previous_pos(previous_coords)
             return
