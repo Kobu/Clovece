@@ -10,9 +10,11 @@ from game_math import *  # weird
 
 # TODO print players in their colour
 
+# TODO get permutations when going from home
+
 # TODO create a turn method with infinite while loop (until all but one player have all their figs in home)
-# will get next player, let him choose a figruine and call handle movement
-# handle when incorrect figurine is chosen - promt the player to choose again
+# will get next player, let him choose a figurine and call handle movement
+# handle when incorrect figurine is chosen - prompt the player to choose again
 # handle when player has no figurines out
 # throwing 6 - HAVE to take out another figurine
 # not throwing 6 - continue
@@ -41,7 +43,7 @@ class Clovece:
 
             player.color = game_board.COLORS[index]
             player.fig_symbol = colored("●", player.color)
-            player.figurines = player.create_figurines()
+            player.figurines = player.create_figurines(self.board.amnt_of_home_squares)
 
     def next_player(self, player):
         next_player = self.players.index(player) + 1
@@ -75,9 +77,6 @@ class Clovece:
             except KeyError:
                 print("cant")
 
-    def successfully_chose_figurine(self):
-        pass
-
     def has_any_possible_moves(self, dice, player):
         active_figurines = player.get_active_figurines()
 
@@ -88,8 +87,11 @@ class Clovece:
         return has_ended.count(True) == len(self.players) - 1
 
     def must_draw_from_home(self, dice, player: player.Player):
-        if not player.has_figurine_out():
-            return True
+        if len(player.get_active_figurines()) == self.board.amnt_of_home_squares:
+            return False
+
+        # if not player.has_figurine_out():
+        #     return True
 
         if 6 not in dice:
             return False
@@ -101,25 +103,16 @@ class Clovece:
         else:
             return True
 
-    def handle_picking_figurine(self, player, dice):
-        pass
-
     def can_draw_from_home(self, player, dice):
         changed_dice = copy.deepcopy(dice)
+        changed_dice.remove(6)
         fig = player.draw_fig_from_home()
 
         if not self.can_step_on_coords(player.start_square, fig):
             print("cant step on coords")
             return False
 
-        changed_dice.remove(6)
-
-        if self.is_move_sequence_possible(changed_dice, player.top_square, fig, player.start_square):
-            print("possible")
-            return True
-        else:
-            print("impossible")
-            return False
+        return self.is_move_sequence_possible(changed_dice, player.top_square, fig, player.start_square)
 
     def play_game(self):
         player = self.players[0]
@@ -131,37 +124,8 @@ class Clovece:
 
             print(f"{player.name} threw {dice}")
 
-            while True:
-                # print(f"{self.must_draw_from_home(dice, player)} must draw from home")
-                # print(f"{self.can_draw_from_home(player, dice)} can draw from home")
-                if self.must_draw_from_home(dice, player) and self.can_draw_from_home(player, dice):
-                    print("handle drawing")
-                    self.handle_drawing_from_home(dice, player)
-                    self.board.print_board()
-                    break
-
-                moves = self.has_any_possible_moves(dice, player)
-                if not any(moves):
-                    print("no possible moves")
-                    break
-
-                fig = self.pick_figurine(player, moves)
-
-                if len(dice) > 1:
-
-                    answer = self.mechanics.create_move_choice_prompt(dice)
-
-                    print(f"possible moves: {answer}")
-
-                    a = int(input())  # in while loop to check if the input is correct
-
-                    dice_order = answer[a]
-                else:
-                    dice_order = dice
-                move = self.mechanics.calculate_moves(dice_order, player.top_square, fig.position)
-                self.handle_movement(player.top_square, fig, move)
-
-                break
+            self.handle_players_turn(dice, player)
+            print("________________________")
 
             if self.is_game_ended():
                 print(f"game has ended, {player.name} has won!")
@@ -169,6 +133,30 @@ class Clovece:
                 break
 
             player = self.next_player(player)
+
+    def handle_players_turn(self, dice, player):
+        # while True:
+
+        if self.must_draw_from_home(dice, player) and self.can_draw_from_home(player, dice):
+            self.handle_drawing_from_home(dice, player)
+            self.board.print_board()
+            return
+            # break
+
+        moves = self.has_any_possible_moves(dice, player)
+        if not any(moves):
+            print("no possible moves")
+            self.board.print_board()
+            return
+            # break
+
+        fig = self.pick_figurine(player, moves)
+
+        move_order = self.mechanics.get_move_order(dice)
+        move = self.mechanics.calculate_moves(move_order, player.top_square, fig.position)
+        self.handle_movement(fig, move)
+
+        # break
 
     def handle_drawing_from_home(self, dice, player):
         fig = player.draw_fig_from_home()
@@ -178,10 +166,10 @@ class Clovece:
 
         calculated_moves = self.mechanics.get_path_from_home(player.start_square, player.top_square, changed_dice)
 
-        self.handle_movement(player.top_square, fig, calculated_moves)
+        self.handle_movement(fig, calculated_moves)
 
     # belongs here, prone to changes
-    def handle_movement(self, top_square, fig: figurine.Figurine, calculated_moves):
+    def handle_movement(self, fig: figurine.Figurine, calculated_moves):
         last_move = calculated_moves[len(calculated_moves) - 1]
 
         for move in calculated_moves:

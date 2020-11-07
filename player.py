@@ -16,8 +16,8 @@ class Player:
 
         # self.figurines = self.create_figurines()
 
-    def create_figurines(self):
-        return [figurine.Figurine(self.name, self.fig_symbol) for i in range(4)]
+    def create_figurines(self, amount):
+        return [figurine.Figurine(self.name, self.fig_symbol) for i in range(amount)]
 
     def has_figurine_out(self):
         for figurine in self.figurines:

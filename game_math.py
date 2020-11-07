@@ -164,7 +164,32 @@ class GameMechanics:
 
     ################################ HELPER METHODS ################################
 
-    def create_move_choice_prompt(self, dice):
+    def create_move_order_choice_prompt(self, dice):
         permutations = self.get_dice_permutations(dice)
 
         return {index: move for index, move in enumerate(permutations)}
+
+    @staticmethod
+    def handle_move_order_choice_prompt(move_dict):
+        user_input = int(input())
+
+        while True:
+            try:
+                return move_dict[user_input]
+            except KeyError:  # keyerror ?
+                print("invalid move")
+                user_input = int(input())
+
+    def get_move_order(self, dice):
+        if len(dice) > 1:
+            move_order = self.create_move_order_choice_prompt(dice)
+            print(f"possible moves: {move_order}")
+
+            return self.handle_move_order_choice_prompt(move_order)
+        else:
+            return dice
+
+
+
+
+
