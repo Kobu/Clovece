@@ -119,26 +119,21 @@ class Clovece:
 
         while True:
             if player.has_figurine_out():
-                print(player.has_figurine_out())
                 dice = self.mechanics.throw()
-                print(f"{player.name} threw {dice}")
+                print(f"{colored(player.name.capitalize(), player.color)} threw {dice}")
             else:
                 for _ in range(3):
                     dice = self.mechanics.throw()
                     if 6 in dice:
-                        print(f"{player.name} threw {dice}")
+                        print(f"{colored(player.name.capitalize(), player.color)} threw {dice}")
                         break
-                    print(f"{player.name} didnt manage to throw a 6")
-
-            # dice = [6,1]
-
-            # print(f"{player.name} threw {dice}")
+                    print(f"{colored(player.name.capitalize(), player.color)} didnt manage to throw a 6")
 
             self.handle_players_turn(dice, player)
             print("________________________")
 
             if self.is_game_ended():
-                print(f"game has ended, {player.name} has won!")
+                print(f"Game has ended, {colored(player.name.capitalize(), player.color)} has won!")
                 self.board.print_board()
                 break
 
@@ -148,13 +143,13 @@ class Clovece:
         if self.must_draw_from_home(dice, player) and self.can_draw_from_home(player, dice):
             self.handle_drawing_from_home(dice, player)
             self.board.print_board()
-            _ = input(f"{player.name} had to draw from home, press enter to continue \n")
+            _ = input(f"{colored(player.name.capitalize(), player.color)} had to draw from home, press enter to continue \n")
             return
 
         possible_moves = self.get_possible_moves(dice, player)
         if not any(possible_moves):
             self.board.print_board()
-            _ = input(f"{player.name} has no possible moves, press enter to continue \n")
+            _ = input(f"{colored(player.name.capitalize(), player.color)} has no possible moves, press enter to continue \n")
             return
         else:
             fig = self.pick_figurine(player, possible_moves)
