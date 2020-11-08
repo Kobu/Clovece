@@ -1,7 +1,11 @@
 class Figurine:
-    def __init__(self, owner, name):
+    def __init__(self, owner, name, top_square, start_square):
         self.owner = owner
         self.name = name
+
+        self.top_square = top_square
+        self.start_square = start_square
+
         self.home = False
 
         self.position = None

@@ -47,8 +47,10 @@ class Clovece:
 
     def next_player(self, player):
         next_player = self.players.index(player) + 1
-        return self.players[next_player - len(self.players)] if next_player > len(self.players) - 1 else self.players[
-            next_player]
+
+        return next_player % len(self.players)
+        # return self.players[next_player - len(self.players)] if next_player > len(self.players) - 1 else self.players[
+        #     next_player]
 
     # NOTE ignore for now, belongs here
     def pick_figurine(self, player, moves):
@@ -77,7 +79,7 @@ class Clovece:
             except KeyError:
                 print("cant")
 
-    def has_any_possible_moves(self, dice, player):
+    def get_possible_moves(self, dice, player):
         active_figurines = player.get_active_figurines()
 
         return [self.is_move_sequence_possible(dice, player.top_square, fig) for fig in active_figurines]
@@ -90,31 +92,28 @@ class Clovece:
         if len(player.get_active_figurines()) == self.board.amnt_of_home_squares:
             return False
 
-        # if not player.has_figurine_out():
-        #     return True
-
         if 6 not in dice:
             return False
 
         if self.is_occupied(player.start_square):  # TODO move to can_draw
             another_fig = self.get_fig_from_coords(player.start_square)
-            print("here")
             return another_fig.owner != player.name
         else:
             return True
 
+    # REFACTOR maybe add can_step_on_coords to fig class ?
     def can_draw_from_home(self, player, dice):
         changed_dice = copy.deepcopy(dice)
         changed_dice.remove(6)
+
         fig = player.draw_fig_from_home()
 
         if not self.can_step_on_coords(player.start_square, fig):
-            print("cant step on coords")
             return False
 
         return self.is_move_sequence_possible(changed_dice, player.top_square, fig, player.start_square)
 
-    def play_game(self):
+    def main(self):
         player = self.players[0]
 
         while True:
@@ -135,40 +134,33 @@ class Clovece:
             player = self.next_player(player)
 
     def handle_players_turn(self, dice, player):
-        # while True:
-
         if self.must_draw_from_home(dice, player) and self.can_draw_from_home(player, dice):
             self.handle_drawing_from_home(dice, player)
             self.board.print_board()
             return
-            # break
 
-        moves = self.has_any_possible_moves(dice, player)
-        if not any(moves):
+        possible_moves = self.get_possible_moves(dice, player)
+        if not any(possible_moves):
             print("no possible moves")
             self.board.print_board()
             return
-            # break
-
-        fig = self.pick_figurine(player, moves)
+        else:
+            fig = self.pick_figurine(player, possible_moves)
 
         move_order = self.mechanics.get_move_order(dice)
         move = self.mechanics.calculate_moves(move_order, player.top_square, fig.position)
         self.handle_movement(fig, move)
 
-        # break
-
     def handle_drawing_from_home(self, dice, player):
-        fig = player.draw_fig_from_home()
-
         changed_dice = copy.deepcopy(dice)
         changed_dice.remove(6)
+
+        fig = player.draw_fig_from_home()
 
         calculated_moves = self.mechanics.get_path_from_home(player.start_square, player.top_square, changed_dice)
 
         self.handle_movement(fig, calculated_moves)
 
-    # belongs here, prone to changes
     def handle_movement(self, fig: figurine.Figurine, calculated_moves):
         last_move = calculated_moves[len(calculated_moves) - 1]
 
@@ -193,8 +185,6 @@ class Clovece:
             another_figurine.knockout_figurine()
 
     def is_move_sequence_possible(self, dice, top_square, fig, start_square=None):
-        # if fig.position is None:
-        #     return False # this causes bugs
         coords = start_square if start_square else fig.position
 
         calculated_moves = self.mechanics.calculate_moves(dice, top_square, coords)

@@ -21,7 +21,8 @@ class GameMechanics:
 
     def get_next_step(self, index, amount):
         next_index = index + amount
-        return self.path[next_index - len(self.path)] if next_index > len(self.path) - 1 else self.path[next_index]
+        return next_index % len(self.path)
+        # return self.path[next_index - len(self.path)] if next_index > len(self.path) - 1 else self.path[next_index]
 
     @staticmethod
     def get_quadrant(coords):
