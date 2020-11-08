@@ -20,10 +20,11 @@ class Player:
         return [figurine.Figurine(self.name, self.fig_symbol, self.top_square, self.start_square) for _ in range(amount)]
 
     def has_figurine_out(self):
-        for figurine in self.figurines:
-            if figurine.position is not None or not figurine.home:
-                return True
-        return False
+        return any([figurine.position is not None for figurine in self.figurines])  # TODO or is home
+        # for figurine in self.figurines:
+        #     if figurine.position is not None or not figurine.home:
+        #         return True
+        # return False
 
     def draw_fig_from_home(self):
         for figurine in self.figurines:

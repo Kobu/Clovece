@@ -20,8 +20,10 @@ class GameMechanics:
         return [i for i in range(2, self.board_size // 2)]
 
     def get_next_step(self, index, amount):
-        next_index = index + amount
-        return next_index % len(self.path)
+        next_step_index = (index + amount)% len(self.path)
+        next_step = self.path[next_step_index]
+
+        return next_step
         # return self.path[next_index - len(self.path)] if next_index > len(self.path) - 1 else self.path[next_index]
 
     @staticmethod
@@ -178,6 +180,9 @@ class GameMechanics:
             try:
                 return move_dict[user_input]
             except KeyError:  # keyerror ?
+                print("invalid move")
+                user_input = int(input())
+            except ValueError:
                 print("invalid move")
                 user_input = int(input())
 

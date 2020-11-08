@@ -4,15 +4,13 @@ import coord_system
 
 COLORS = ["blue", "green", "yellow", "red"]
 LETTERS = ["B", "G", "Y", "R"]
-FIGURINE_LETTERS = ["1", "2", "3", "4"]
+FIGURINE_LETTERS = ["1", "2", "3", "4"]  # TODO what if theres more than 4 figruines
 
-
-# TODO MAKE PLAYERS FIGURINES IN THE COLOR OF THE PLAYER AND BOLD -> WILl NEED IMPORTING OTHER FILES
 
 class Board:
     def __init__(self, size, playing_square, home_square, middle_square, empty_square):
         self.size = size
-        self.amnt_of_home_squares = self.size // 2 - 1  # REFACTOR not used ?
+        self.amnt_of_home_squares = self.size // 2 - 1
 
         self.empty_square = empty_square
         self.playing_square = playing_square
